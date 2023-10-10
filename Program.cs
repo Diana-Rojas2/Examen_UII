@@ -1,7 +1,26 @@
+//using _2._5_WebSockets.Hubs;
+using Examen_UII.Models;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddDbContext<AguaDBContext>(opciones =>{
+    opciones.UseSqlServer(
+        builder.Configuration.GetConnectionString("AguaDB"));
+});
+
+builder.Services.AddSignalR();
+
+builder.Services.AddAuthentication(
+    CookieAuthenticationDefaults.AuthenticationScheme
+).AddCookie(opciones =>{
+    opciones.LoginPath = new PathString("/Usuarios/Login");
+    opciones.AccessDeniedPath = new PathString("/Usuarios/NoPermitido");
+});
 
 var app = builder.Build();
 
@@ -13,15 +32,18 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+//app.MapHub<MensajeHub>("/WebSocketServer");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Usuarios}/{action=Login}");
 
 app.Run();

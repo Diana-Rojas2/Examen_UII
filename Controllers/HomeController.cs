@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Examen_UII.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Examen_UII.Controllers;
 
@@ -13,11 +14,14 @@ public class HomeController : Controller
         _logger = logger;
     }
 
+    [Authorize]
     public IActionResult Index()
     {
         return View();
     }
 
+    [Authorize]
+    [Authorize(Roles = "Admin")]
     public IActionResult Privacy()
     {
         return View();
