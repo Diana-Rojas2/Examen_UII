@@ -1,0 +1,73 @@
+@model Examen_UII.Models.Dispositivos
+
+@{
+    ViewData["Title"] = "Registrar";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title text-center">Registrar Dispositivo</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" asp-action="Registrar">
+                        <div class="form-group">
+                            <label for="Identificador">Identificador:</label>
+                            <input type="text" asp-for="Identificador" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="DireccionMAC">Dirección MAC:</label>
+                            <input type="text" asp-for="DireccionMAC" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="Descripcion">Descripción:</label>
+                            <input type="text" asp-for="Descripcion" class="form-control" />
+                        </div>
+                        <div class="form-group">
+                            <label for="Prioridad">Prioridad:</label>
+                            <input type="number" asp-for="Prioridad" class="form-control" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="UsuariosId">Seleccionar Usuario:</label>
+                            <select asp-for="UsuariosId" class="form-control">
+                                <option value="">Seleccione un usuario</option>
+                                @foreach (var usuario in ViewData["Usuarios"] as List<SelectListItem>)
+                                {
+                                    <option value="@usuario.Value">@usuario.Text</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="ZonasId">Seleccionar Zona:</label>
+                            <select asp-for="ZonasId" class="form-control">
+                                <option value="">Seleccione una zona</option>
+                                @foreach (var zona in ViewData["Zonas"] as List<SelectListItem>)
+                                {
+                                    <option value="@zona.Value">@zona.Text</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="EstadosId">Seleccionar Estado:</label>
+                            <select asp-for="EstadosId" class="form-control">
+                                <option value="">Seleccione un estado</option>
+                                @foreach (var estado in ViewData["Estados"] as List<SelectListItem>)
+                                {
+                                    <option value="@estado.Value">@estado.Text</option>
+                                }
+                            </select>
+                        </div>
+                        <center>
+                        <button type="submit" class="btn btn-success mt-3 ">Registrar</button>
+                        </center>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
