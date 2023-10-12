@@ -31,6 +31,19 @@
                         </div>
 
                         <div class="form-group">
+                            <label asp-for="Latitud">Latitud:</label>
+                            <input type="text" asp-for="Latitud" class="form-control" value="@Model.Latitud" disabled />
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Longitud">Longitud: </label>
+                            <input type="text" asp-for="Longitud" class="form-control" value="@Model.Longitud"
+                                disabled />
+                        </div>
+
+
+
+                        <div class="form-group">
                             <label for="UsuariosId">Seleccionar Usuario:</label>
                             <select asp-for="UsuariosId" class="form-control">
                                 <option value="">Seleccione un usuario</option>
@@ -63,7 +76,7 @@
                             </select>
                         </div>
                         <center>
-                        <button type="submit" class="btn btn-success mt-3 ">Registrar</button>
+                            <button type="submit" class="btn btn-success mt-3 ">Registrar</button>
                         </center>
                     </form>
                 </div>

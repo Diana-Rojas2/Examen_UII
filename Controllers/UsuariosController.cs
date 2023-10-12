@@ -55,7 +55,8 @@ namespace _2._5_WebSockets.Controllers
             return View();
         }
 
-        public async Task<IActionResult> CerrarSesion(){
+        public async Task<IActionResult> CerrarSesion()
+        {
             await HttpContext.SignOutAsync();
             return RedirectToAction("Login");
         }

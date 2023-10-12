@@ -1,0 +1,76 @@
+@model IEnumerable<Examen_UII.Models.Dispositivos>
+
+@{
+    ViewData["Title"] = "Consultar";
+}
+
+<form method="get" asp-action="Mapa">
+        
+        <button class="btn btn-primary" type="submit">Agregar un Dispositivo</button>
+    </form>
+
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col">
+            <h2 class="text-center">Dispositivos registrados</h2>
+            <br>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Identificador</th>
+                        <th>Dirección MAC</th>
+                        <th>Descripción</th>
+                        <th>Prioridad</th>
+                        <th>Latitud</th>
+                        <th>Longitud</th>
+                        <th>Usuario</th>
+                        <th>Zona</th>
+                        <th>Estado</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var dispositivo in Model)
+                    {
+                        <tr>
+                            <td>@dispositivo.Identificador</td>
+                            <td>@dispositivo.DireccionMAC</td>
+                            <td>@dispositivo.Descripcion</td>
+                            <td>@dispositivo.Prioridad</td>
+                            <td>@dispositivo.Latitud</td>
+                            <td>@dispositivo.Longitud</td>
+                            <td>@dispositivo.Usuarios.Nombre</td>
+                            <td>@dispositivo.Zonas.Nombre</td>
+                            <td>@dispositivo.Estados.Nombre</td>
+                            <td>
+                                <button class="btn btn-primary" onclick="cambiarEstado('@dispositivo.ID')">
+                                    Cambiar estado</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+@section scripts {
+    <script>
+        function cambiarEstado(id) {
+            // Hacer una solicitud AJAX para cambiar el estado del dispositivo
+            $.ajax({
+                type: 'POST',
+                url: '/Dispositivos/CambiarEstado', // Especifica la URL del controlador y la acción para cambiar el estado
+                data: { id: id },
+                success: function (response) {
+                    // Actualizar la página o mostrar un mensaje de éxito
+                    location.reload();
+                },
+                error: function () {
+                    // Mostrar un mensaje de error si la solicitud falla
+                    alert('Error al cambiar el estado del dispositivo.');
+                }
+            });
+        }
+    </script>
+}

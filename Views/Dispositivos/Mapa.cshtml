@@ -19,9 +19,11 @@
     </div>
 
     <form method="get" asp-action="Registrar">
-        
+        <input type="hidden" name="Latitud" id="Latitud" />
+        <input type="hidden" name="Longitud" id="Longitud" />
         <button type="submit">Continuar</button>
     </form>
+
 
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
@@ -38,10 +40,9 @@
             }
             marker = L.marker(e.latlng).addTo(map);
 
-            // Actualiza las coordenadas en los campos del formulario
-            // (latitud y longitud ya no son campos ocultos)
             document.getElementById("Latitud").value = e.latlng.lat;
             document.getElementById("Longitud").value = e.latlng.lng;
+
         });
     </script>
 </div>
