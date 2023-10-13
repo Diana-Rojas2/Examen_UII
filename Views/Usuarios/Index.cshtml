@@ -1,0 +1,11 @@
+@model Examen_UII.Models.Usuarios
+@{
+    ViewData["Title"] = "Index";
+}
+
+<div>
+    @if (User.Identity.IsAuthenticated)
+    {
+        <h4 class="text-end" style="color: rgb(0, 157, 255);">Iniciaste sesión como: @ViewData["UserName"]</h4>
+    }
+</div>

@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Examen_UII.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -36,6 +37,7 @@ namespace _2._5_WebSockets.Controllers
                 if (utemp != null)
                 {
                     List<Claim> claims = new List<Claim>();
+                    claims.Add(new Claim("userId", utemp.ID.ToString()));
                     claims.Add(new Claim("username", utemp.Usuario!));
                     claims.Add(new Claim(ClaimTypes.NameIdentifier, utemp.Usuario!));
                     claims.Add(new Claim(ClaimTypes.Role, utemp.Roles.Rol));
@@ -43,18 +45,28 @@ namespace _2._5_WebSockets.Controllers
                         CookieAuthenticationDefaults.AuthenticationScheme);
                     ClaimsPrincipal principal = new ClaimsPrincipal(identity);
                     await HttpContext.SignInAsync(principal);
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Index");
                 }
             }
             ViewBag.Error = "Usuario y/o password incorrectos";
             return View(u);
         }
 
+        [Authorize]
+        public IActionResult Index()
+        {
+            var username = User.FindFirstValue(ClaimTypes.NameIdentifier); // Obtener el correo del usuario
+            ViewData["UserName"] = username; // Agregar el correo a la ViewData
+            return View();
+        }
+
+        [Authorize]
         public IActionResult NoPermitido()
         {
             return View();
         }
 
+        [Authorize]
         public async Task<IActionResult> CerrarSesion()
         {
             await HttpContext.SignOutAsync();

@@ -89,15 +89,34 @@ namespace Examen_UII.Controllers
         [Authorize]
         public IActionResult Consultar()
         {
+            int userId = Convert.ToInt32(User.FindFirstValue("userId"));
 
-            var dispositivo = _db.Dispositivos
-                                .Include(d => d.Usuarios)
-                                .Include(d => d.Zonas)
-                                .Include(d => d.Estados)
-                                .ToList();
+            ViewData["userId"] = userId;
 
-            return View(dispositivo);
+            if (User.IsInRole("Admin"))
+            {
+                // Si el usuario es administrador, muestra todos los dispositivos
+                var dispositivos = _db.Dispositivos
+                    .Include(d => d.Usuarios)
+                    .Include(d => d.Zonas)
+                    .Include(d => d.Estados)
+                    .ToList();
+
+                return View(dispositivos);
+            }
+            else
+            {
+                var dispositivos = _db.Dispositivos
+                    .Include(d => d.Usuarios)
+                    .Include(d => d.Zonas)
+                    .Include(d => d.Estados)
+                    .Where(d => d.UsuariosId == userId)
+                    .ToList();
+
+                return View(dispositivos);
+            }
         }
+
 
         [HttpPost]
         public async Task<IActionResult> CambiarEstado(int id)
