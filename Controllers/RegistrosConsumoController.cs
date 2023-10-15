@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Examen_UII.Hubs;
 using Examen_UII.Models;
@@ -28,7 +29,7 @@ namespace Examen_UII.Controllers
         [HttpGet]
         public IActionResult Registrar(int dispositivoId)
         {
-            ViewData["DispositivosId"] = dispositivoId; // Establece el valor del ID del dispositivo
+            ViewData["DispositivosId"] = dispositivoId;
             return View();
         }
 
@@ -39,31 +40,40 @@ namespace Examen_UII.Controllers
             {
                 registros.Fin = DateTime.Now;
 
-                // Modifica la consulta para obtener el último registro por fecha
-                var registroExistente = await _db.RegistrosConsumo
-                    .Where(r => r.DispositivosId == registros.DispositivosId)
-                    .OrderByDescending(r => r.Inicio) // Ordenar por fecha en orden descendente
-                    .FirstOrDefaultAsync();
-
-                if (registroExistente != null)
-                {
-                    registroExistente.Fin = registros.Fin;
-                    registroExistente.CantidadLitrosRegistrados = registros.CantidadLitrosRegistrados;
-                }
-                else
-                {
-                    return RedirectToAction("Error", "Usuarios");
-                }
-
+                int userId = Convert.ToInt32(User.FindFirstValue("userId"));
                 var dispositivo = await _db.Dispositivos.FindAsync(registros.DispositivosId);
                 if (dispositivo != null)
                 {
-                    dispositivo.EstadosId = 2;
+                    bool Admin = User.IsInRole("Administrador");
+
+                    if (dispositivo.UsuariosId == userId || Admin)
+                    {
+                        var registroExistente = await _db.RegistrosConsumo
+                            .Where(r => r.DispositivosId == registros.DispositivosId)
+                            .OrderByDescending(r => r.Inicio)
+                            .FirstOrDefaultAsync();
+
+                        if (registroExistente != null)
+                        {
+                            registroExistente.Fin = registros.Fin;
+                            registroExistente.CantidadLitrosRegistrados = registros.CantidadLitrosRegistrados;
+                        }
+                        else
+                        {
+                            return RedirectToAction("Error", "Usuarios");
+                        }
+
+                        dispositivo.EstadosId = 2;
+
+                        await _db.SaveChangesAsync();
+
+                        return RedirectToAction("Consultar", "Dispositivos");
+                    }
+                    else
+                    {
+                        return RedirectToAction("NoPermitido", "Usuarios");
+                    }
                 }
-
-                await _db.SaveChangesAsync();
-
-                return RedirectToAction("Consultar", "Dispositivos");
             }
 
             return View(registros);

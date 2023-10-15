@@ -88,7 +88,6 @@ namespace Examen_UII.Controllers
         {
             if (ModelState.IsValid)
             {
-                //dispositivo.EstadosId = 1;
                 if (dispositivo.EstadosId == 1)
                 {
                     _db.Dispositivos.Add(dispositivo);
@@ -106,12 +105,14 @@ namespace Examen_UII.Controllers
 
                     return RedirectToAction("Consultar");
                 }
-                else
+                else if (dispositivo.EstadosId == 2)
                 {
                     _db.Dispositivos.Add(dispositivo);
                     await _db.SaveChangesAsync();
 
                     return RedirectToAction("Consultar");
+                } else {
+                    return RedirectToAction("Error", "Usuarios");
                 }
 
             }
@@ -151,21 +152,30 @@ namespace Examen_UII.Controllers
         {
             var dispositivo = await _db.Dispositivos.FindAsync(id);
 
+            int userId = Convert.ToInt32(User.FindFirstValue("userId"));
+
+            bool Admin = User.IsInRole("Administrador");
+
             if (dispositivo != null)
             {
-                dispositivo.EstadosId = 1;
-
-                var nuevoRegistro = new RegistrosConsumo
+                if (dispositivo.UsuariosId == userId || Admin)
                 {
-                    DispositivosId = dispositivo.ID,
-                    Inicio = DateTime.Now
-                };
+                    dispositivo.EstadosId = 1;
 
-                _db.RegistrosConsumo.Add(nuevoRegistro);
+                    var nuevoRegistro = new RegistrosConsumo
+                    {
+                        DispositivosId = dispositivo.ID,
+                        Inicio = DateTime.Now
+                    };
 
-                await _db.SaveChangesAsync();
+                    _db.RegistrosConsumo.Add(nuevoRegistro);
 
-                return RedirectToAction("Consultar");
+                    await _db.SaveChangesAsync();
+
+                    return RedirectToAction("Consultar");
+                } else{
+                    return RedirectToAction("NoPermitido", "Usuarios");
+                }
             }
             else
             {
