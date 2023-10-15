@@ -17,8 +17,7 @@
     <h2>Elige un Dispositivo:</h2>
     <div id="map"></div>
 
-    <form method="get" id="deviceForm">
-        <input type="hidden" id="DispositivoId" name="DispositivoId" value="" />
+    <form id="deviceForm">
         <input type="hidden" id="EstadoId" name="EstadoId" value="" />
         <button id="btn" class="btn btn-primary">Continuar</button>
 
@@ -28,7 +27,7 @@
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.11/signalr.min.js"></script>
     <script>
-        var markers = {}; // Un objeto para almacenar los marcadores con sus respectivos IDs
+        var markers = {};
 
         var connection = new signalR.HubConnectionBuilder().withUrl("/mapHub").build();
 
@@ -45,64 +44,54 @@
         @foreach (var dispositivo in Model)
         {
             <text>
-                            // Determina el ícono y color del marcador según el estado
-                    var icon;
-                    var estadoId = @dispositivo.EstadosId;
-                    if (estadoId === 1) {
-                        icon = L.icon({
-                            iconUrl: 'https://cdn.pixabay.com/photo/2014/04/03/10/03/google-309741_1280.png',
-                            iconSize: [25, 41],
-                            iconAnchor: [12, 41],
-                            popupAnchor: [1, -34]
-                        });
-                            } else if (estadoId === 2) {
-                        icon = L.icon({
-                            iconUrl: 'https://cdn.pixabay.com/photo/2014/04/03/10/03/google-309740_960_720.png',
-                            iconSize: [25, 41],
-                            iconAnchor: [12, 41],
-                            popupAnchor: [1, -34]
-                        });
-                            }
+                // Determina el ícono y color del marcador según el estado
+                var icon;
+                var estadoId = @dispositivo.EstadosId;
+                if (estadoId === 1) {
+                    icon = L.icon({
+                        iconUrl: 'https://cdn.pixabay.com/photo/2014/04/03/10/03/google-309741_1280.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34]
+                    });
+                } else if (estadoId === 2) {
+                    icon = L.icon({
+                        iconUrl: 'https://cdn.pixabay.com/photo/2014/04/03/10/03/google-309740_960_720.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34]
+                    });
+                }
 
-                    var marker = L.marker([@dispositivo.Latitud, @dispositivo.Longitud], {icon: icon }).addTo(map);
-                    marker.bindPopup("ID: @dispositivo.Identificador").openPopup();
+                var marker = L.marker([@dispositivo.Latitud, @dispositivo.Longitud], { icon: icon }).addTo(map);
+                marker.bindPopup("ID: @dispositivo.Identificador").openPopup();
 
-                    // Agrega el marcador al objeto "markers" con su ID
-                    markers[@dispositivo.ID] = marker;
+                markers[@dispositivo.ID] = marker;
 
-                    // Asigna un evento clic para el marcador
-                    marker.on('click', function (e) {
-                                var dispositivoId = @dispositivo.ID; // Obtiene el ID del dispositivo
-                    var estadoId = @dispositivo.EstadosId; // Obtiene el estado del dispositivo
-                    document.getElementById("DispositivoId").value = dispositivoId;
+                marker.on('click', function (e) {
+                    var dispositivoId = @dispositivo.ID; 
+                    var estadoId = @dispositivo.EstadosId; 
                     document.getElementById("EstadoId").value = estadoId;
-                            });
+
+                    var hiddenField = estadoId === 1 ? "dispositivoId" : "id";
+
+                    var input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = hiddenField;
+                    input.value = dispositivoId;
+                    document.getElementById("deviceForm").appendChild(input);
+                });
             </text>
         }
 
-            map.on('click', function (e) {
-                if (marker) {
-                    map.removeLayer(marker);
-                }
-                marker = L.marker(e.latlng).addTo(map);
+        document.getElementById("map").style.cursor = "not-allowed"; // Deshabilitar el cursor del mapa
 
-                var latitud = e.latlng.lat;
-                var longitud = e.latlng.lng;
-
-                document.getElementById("Latitud").value = latitud;
-                document.getElementById("Longitud").value = longitud;
-
-                var dispositivoId = obtenerIdDelDispositivo(e.latlng);
-                document.getElementById("DispositivoId").value = dispositivoId;
-
-                connection.invoke("NuevasCoordenadas", latitud, longitud).catch(function (err) {
-                    console.error(err.toString());
-                });
-            });
+        
 
         document.getElementById("deviceForm").onsubmit = function () {
             var estadoId = document.getElementById("EstadoId").value;
             if (estadoId === "1") {
+                this.method = "GET";
                 this.action = "/RegistrosConsumo/Registrar";
             } else if (estadoId === "2") {
                 this.method = "POST";
