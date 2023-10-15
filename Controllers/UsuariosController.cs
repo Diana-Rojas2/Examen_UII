@@ -67,6 +67,12 @@ namespace _2._5_WebSockets.Controllers
         }
 
         [Authorize]
+        public IActionResult Error()
+        {
+            return View();
+        }
+
+        [Authorize]
         public async Task<IActionResult> CerrarSesion()
         {
             await HttpContext.SignOutAsync();

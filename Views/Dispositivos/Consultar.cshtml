@@ -3,13 +3,14 @@
 @{
     ViewData["Title"] = "Consultar";
 }
+@if (User.IsInRole("Admin"))
+{
 
-<form method="get" asp-action="Mapa">
-        
+    <form method="get" asp-action="Registrar">
         <button class="btn btn-primary" type="submit">Agregar un Dispositivo</button>
     </form>
 
-
+}
 <div class="container">
     <div class="row justify-content-center">
         <div class="col">
@@ -44,8 +45,21 @@
                             <td>@dispositivo.Zonas.Nombre</td>
                             <td>@dispositivo.Estados.Nombre</td>
                             <td>
-                                <button class="btn btn-primary" onclick="cambiarEstado('@dispositivo.ID')">
-                                    Cambiar estado</button>
+                                @if (@dispositivo.Estados.Nombre == "Abierto")
+                                {
+                                    <form method="get" asp-controller="RegistrosConsumo" asp-action="Registrar">
+                                        <input type="hidden" name="dispositivoId" value="@dispositivo.ID" />
+                                        <button class="btn btn-primary" type="submit" class="btn btn-primary">Cambiar
+                                            Estado</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form method="post" asp-action="CambiarEstado">
+                                        <input type="hidden" name="id" value="@dispositivo.ID" />
+                                        <button class="btn btn-primary" type="submit">Cambiar Estado</button>
+                                    </form>
+                                }
                             </td>
                         </tr>
                     }
@@ -54,23 +68,23 @@
         </div>
     </div>
 </div>
-@section scripts {
-    <script>
-        function cambiarEstado(id) {
-            // Hacer una solicitud AJAX para cambiar el estado del dispositivo
-            $.ajax({
-                type: 'POST',
-                url: '/Dispositivos/CambiarEstado', // Especifica la URL del controlador y la acción para cambiar el estado
-                data: { id: id },
-                success: function (response) {
-                    // Actualizar la página o mostrar un mensaje de éxito
-                    location.reload();
-                },
-                error: function () {
-                    // Mostrar un mensaje de error si la solicitud falla
-                    alert('Error al cambiar el estado del dispositivo.');
-                }
-            });
-        }
-    </script>
+@* @section scripts {
+<script>
+function cambiarEstado(id) {
+// Hacer una solicitud AJAX para cambiar el estado del dispositivo
+$.ajax({
+type: 'POST',
+url: '/Dispositivos/CambiarEstado', // Especifica la URL del controlador y la acción para cambiar el estado
+data: { id: id },
+success: function (response) {
+// Actualizar la página o mostrar un mensaje de éxito
+location.reload();
+},
+error: function () {
+// Mostrar un mensaje de error si la solicitud falla
+alert('Error al cambiar el estado del dispositivo.');
 }
+});
+}
+</script>
+} *@

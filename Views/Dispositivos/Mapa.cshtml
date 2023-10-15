@@ -1,7 +1,7 @@
-@model Examen_UII.Models.Dispositivos
+@model IEnumerable<Examen_UII.Models.Dispositivos>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Mapa";
 }
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
@@ -14,35 +14,100 @@
 </style>
 
 <div>
-    <h2>Mapa para seleccionar coordenadas</h2>
-    <div id="map">
-    </div>
+    <h2>Elige un Dispositivo:</h2>
+    <div id="map"></div>
 
-    <form method="get" asp-action="Registrar">
-        <input type="hidden" name="Latitud" id="Latitud" />
-        <input type="hidden" name="Longitud" id="Longitud" />
-        <button type="submit">Continuar</button>
+    <form method="get" id="deviceForm">
+        <input type="hidden" id="DispositivoId" name="DispositivoId" value="" />
+        <input type="hidden" id="EstadoId" name="EstadoId" value="" />
+        <button id="btn" class="btn btn-primary">Continuar</button>
+
+        <div asp-validation-summary="All" class="text-danger"></div>
     </form>
 
-
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.11/signalr.min.js"></script>
     <script>
-        var map = L.map('map').setView([19.03793, -98.20346], 9);
+        var markers = {}; // Un objeto para almacenar los marcadores con sus respectivos IDs
+
+        var connection = new signalR.HubConnectionBuilder().withUrl("/mapHub").build();
+
+        connection.on("NuevasCoordenadas", function (latitud, longitud) {
+            document.getElementById("Latitud").value = latitud;
+            document.getElementById("Longitud").value = longitud;
+        });
+
+        var map = L.map('map').setView([19.8160106, -97.35705759999999], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
         }).addTo(map);
 
-        var marker;
+        @foreach (var dispositivo in Model)
+        {
+            <text>
+                            // Determina el ícono y color del marcador según el estado
+                    var icon;
+                    var estadoId = @dispositivo.EstadosId;
+                    if (estadoId === 1) {
+                        icon = L.icon({
+                            iconUrl: 'https://cdn.pixabay.com/photo/2014/04/03/10/03/google-309741_1280.png',
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 41],
+                            popupAnchor: [1, -34]
+                        });
+                            } else if (estadoId === 2) {
+                        icon = L.icon({
+                            iconUrl: 'https://cdn.pixabay.com/photo/2014/04/03/10/03/google-309740_960_720.png',
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 41],
+                            popupAnchor: [1, -34]
+                        });
+                            }
 
-        map.on('click', function (e) {
-            if (marker) {
-                map.removeLayer(marker);
+                    var marker = L.marker([@dispositivo.Latitud, @dispositivo.Longitud], {icon: icon }).addTo(map);
+                    marker.bindPopup("ID: @dispositivo.Identificador").openPopup();
+
+                    // Agrega el marcador al objeto "markers" con su ID
+                    markers[@dispositivo.ID] = marker;
+
+                    // Asigna un evento clic para el marcador
+                    marker.on('click', function (e) {
+                                var dispositivoId = @dispositivo.ID; // Obtiene el ID del dispositivo
+                    var estadoId = @dispositivo.EstadosId; // Obtiene el estado del dispositivo
+                    document.getElementById("DispositivoId").value = dispositivoId;
+                    document.getElementById("EstadoId").value = estadoId;
+                            });
+            </text>
+        }
+
+            map.on('click', function (e) {
+                if (marker) {
+                    map.removeLayer(marker);
+                }
+                marker = L.marker(e.latlng).addTo(map);
+
+                var latitud = e.latlng.lat;
+                var longitud = e.latlng.lng;
+
+                document.getElementById("Latitud").value = latitud;
+                document.getElementById("Longitud").value = longitud;
+
+                var dispositivoId = obtenerIdDelDispositivo(e.latlng);
+                document.getElementById("DispositivoId").value = dispositivoId;
+
+                connection.invoke("NuevasCoordenadas", latitud, longitud).catch(function (err) {
+                    console.error(err.toString());
+                });
+            });
+
+        document.getElementById("deviceForm").onsubmit = function () {
+            var estadoId = document.getElementById("EstadoId").value;
+            if (estadoId === "1") {
+                this.action = "/RegistrosConsumo/Registrar";
+            } else if (estadoId === "2") {
+                this.method = "POST";
+                this.action = "/Dispositivos/CambiarEstado";
             }
-            marker = L.marker(e.latlng).addTo(map);
-
-            document.getElementById("Latitud").value = e.latlng.lat;
-            document.getElementById("Longitud").value = e.latlng.lng;
-
-        });
+        };
     </script>
 </div>

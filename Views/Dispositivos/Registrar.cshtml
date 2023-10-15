@@ -4,6 +4,14 @@
     ViewData["Title"] = "Registrar";
 }
 
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+<style>
+    #map {
+        height: 300px;
+        width: 100%;
+    }
+</style>
+
 <div class="container">
     <div class="row justify-content-center">
         <div class="col-md-6">
@@ -13,6 +21,7 @@
                 </div>
                 <div class="card-body">
                     <form method="post" asp-action="Registrar">
+                        <div asp-validation-summary="All" class="text-danger"></div>
                         <div class="form-group">
                             <label for="Identificador">Identificador:</label>
                             <input type="text" asp-for="Identificador" class="form-control" />
@@ -31,52 +40,52 @@
                         </div>
 
                         <div class="form-group">
-                            <label asp-for="Latitud">Latitud:</label>
-                            <input type="text" asp-for="Latitud" class="form-control" value="@Model.Latitud" disabled />
-                        </div>
+                            <label>Coordenadas:</label>
+                            <!-- Campo de coordenadas ocultas -->
+                            <input type="hidden" name="Latitud" id="Latitud" />
+                            <input type="hidden" name="Longitud" id="Longitud" />
 
-                        <div class="form-group">
-                            <label asp-for="Longitud">Longitud: </label>
-                            <input type="text" asp-for="Longitud" class="form-control" value="@Model.Longitud"
-                                disabled />
+                            <!-- Mapa para seleccionar coordenadas -->
+                            <div id="map"></div>
                         </div>
-
 
 
                         <div class="form-group">
                             <label for="UsuariosId">Seleccionar Usuario:</label>
                             <select asp-for="UsuariosId" class="form-control">
-                                <option value="">Seleccione un usuario</option>
                                 @foreach (var usuario in ViewData["Usuarios"] as List<SelectListItem>)
                                 {
                                     <option value="@usuario.Value">@usuario.Text</option>
                                 }
                             </select>
                         </div>
-
                         <div class="form-group">
                             <label for="ZonasId">Seleccionar Zona:</label>
                             <select asp-for="ZonasId" class="form-control">
-                                <option value="">Seleccione una zona</option>
                                 @foreach (var zona in ViewData["Zonas"] as List<SelectListItem>)
                                 {
                                     <option value="@zona.Value">@zona.Text</option>
                                 }
                             </select>
                         </div>
-
                         <div class="form-group">
-                            <label for="EstadosId">Seleccionar Estado:</label>
+                            <label for="EstadosId">Seleccionar Zona:</label>
                             <select asp-for="EstadosId" class="form-control">
-                                <option value="">Seleccione un estado</option>
                                 @foreach (var estado in ViewData["Estados"] as List<SelectListItem>)
                                 {
                                     <option value="@estado.Value">@estado.Text</option>
                                 }
                             </select>
                         </div>
+                        @* <div class="form-group">
+                            <label for="EstadosId">Estado:</label>
+                            <select asp-for="EstadosId" class="form-control" disabled>
+                                <option value="1">Abierto</option>
+                            </select>
+                            <input type="hidden" asp-for="EstadosId" value="1" />
+                        </div> *@
                         <center>
-                            <button type="submit" class="btn btn-success mt-3 ">Registrar</button>
+                            <button type="submit" class="btn btn-success mt-3">Registrar</button>
                         </center>
                     </form>
                 </div>
@@ -84,3 +93,44 @@
         </div>
     </div>
 </div>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/3.1.11/signalr.min.js"></script>
+<script>
+    var connection = new signalR.HubConnectionBuilder().withUrl("/mapHub").build();
+
+    connection.on("NuevasCoordenadas", function (latitud, longitud) {
+        document.getElementById("Latitud").value = latitud;
+        document.getElementById("Longitud").value = longitud;
+    });
+
+    var map = L.map('map').setView([19.813033780427087, -97.34512172937008], 9);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+    }).addTo(map);
+
+    var marker;
+
+    map.on('click', function (e) {
+        if (marker) {
+            map.removeLayer(marker);
+        }
+        marker = L.marker(e.latlng).addTo(map);
+
+        var latitud = e.latlng.lat;
+        var longitud = e.latlng.lng;
+
+        // Establece las coordenadas en los campos ocultos
+        document.getElementById("Latitud").value = latitud;
+        document.getElementById("Longitud").value = longitud;
+
+        // Envía las coordenadas al servidor a través de SignalR
+        connection.invoke("NuevasCoordenadas", latitud, longitud).catch(function (err) {
+            console.error(err.toString());
+        });
+    });
+
+    connection.start().catch(function (err) {
+        console.error(err.toString());
+    });
+</script>

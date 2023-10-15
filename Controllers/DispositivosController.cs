@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Examen_UII.Hubs;
 using Examen_UII.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,28 +14,45 @@ using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
+
 namespace Examen_UII.Controllers
 {
+    [Authorize]
     public class DispositivosController : Controller
     {
         private readonly AguaDBContext _db;
+        private readonly IHubContext<MapHub> _hubContext;
 
-        public DispositivosController(AguaDBContext db)
+        public DispositivosController(AguaDBContext db, IHubContext<MapHub> hubContext)
         {
             _db = db;
+            _hubContext = hubContext;
         }
 
-        [Authorize]
-        [Authorize(Roles = "Admin")]
         public IActionResult Mapa()
         {
-            return View();
+            int userId = Convert.ToInt32(User.FindFirstValue("userId"));
+
+            List<Dispositivos> dispositivos;
+
+            if (User.IsInRole("Admin"))
+            {
+                dispositivos = _db.Dispositivos.ToList();
+            }
+            else
+            {
+                dispositivos = _db.Dispositivos
+                    .Where(d => d.UsuariosId == userId)
+                    .ToList();
+            }
+
+            return View(dispositivos);
         }
 
-        [Authorize]
+
         [Authorize(Roles = "Admin")]
         [HttpGet]
-        public IActionResult Registrar(double? Latitud, double? Longitud)
+        public IActionResult Registrar()
         {
             var listaUsuarios = _db.Usuarios
                 .Where(u => u.RolesId != 1)
@@ -61,89 +79,97 @@ namespace Examen_UII.Controllers
             ViewData["Zonas"] = listaZonas;
             ViewData["Estados"] = listaEstados;
 
-            var dispositivo = new Dispositivos
-            {
-                Latitud = (double)Latitud,
-                Longitud = (double)Longitud
-            };
-
-            return View(dispositivo);
+            return View();
         }
 
-        [Authorize]
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> Registrar(Dispositivos dispositivo)
         {
             if (ModelState.IsValid)
             {
-                _db.Dispositivos.Add(dispositivo);
-                await _db.SaveChangesAsync();
+                //dispositivo.EstadosId = 1;
+                if (dispositivo.EstadosId == 1)
+                {
+                    _db.Dispositivos.Add(dispositivo);
 
-                return RedirectToAction("Consultar");
+                    await _db.SaveChangesAsync();
+
+                    var registroConsumo = new RegistrosConsumo
+                    {
+                        DispositivosId = dispositivo.ID,
+                        Inicio = DateTime.Now
+                    };
+                    _db.RegistrosConsumo.Add(registroConsumo);
+
+                    await _db.SaveChangesAsync();
+
+                    return RedirectToAction("Consultar");
+                }
+                else
+                {
+                    _db.Dispositivos.Add(dispositivo);
+                    await _db.SaveChangesAsync();
+
+                    return RedirectToAction("Consultar");
+                }
+
             }
 
             return View(dispositivo);
         }
 
-        [Authorize]
         public IActionResult Consultar()
         {
             int userId = Convert.ToInt32(User.FindFirstValue("userId"));
-
-            ViewData["userId"] = userId;
-
             if (User.IsInRole("Admin"))
             {
-                // Si el usuario es administrador, muestra todos los dispositivos
                 var dispositivos = _db.Dispositivos
-                    .Include(d => d.Usuarios)
-                    .Include(d => d.Zonas)
-                    .Include(d => d.Estados)
-                    .ToList();
+                .Include(d => d.Usuarios)
+                .Include(d => d.Zonas)
+                .Include(d => d.Estados)
+                .ToList();
 
                 return View(dispositivos);
             }
             else
             {
                 var dispositivos = _db.Dispositivos
-                    .Include(d => d.Usuarios)
-                    .Include(d => d.Zonas)
-                    .Include(d => d.Estados)
-                    .Where(d => d.UsuariosId == userId)
-                    .ToList();
+                .Include(d => d.Usuarios)
+                .Include(d => d.Zonas)
+                .Include(d => d.Estados)
+                .Where(d => d.UsuariosId == userId)
+                .ToList();
 
                 return View(dispositivos);
             }
-        }
 
+        }
 
         [HttpPost]
         public async Task<IActionResult> CambiarEstado(int id)
         {
             var dispositivo = await _db.Dispositivos.FindAsync(id);
 
-            if (dispositivo == null)
+            if (dispositivo != null)
             {
-                return NotFound();
-            }
-            var estadoAbierto = await _db.Estados.FirstOrDefaultAsync(e => e.Nombre == "Abierto");
-            var estadoCerrado = await _db.Estados.FirstOrDefaultAsync(e => e.Nombre == "Cerrado");
+                dispositivo.EstadosId = 1;
 
-            if (estadoAbierto == null || estadoCerrado == null)
-            {
-                return BadRequest("Los estados 'Abierto' y 'Cerrado' no están definidos en la base de datos.");
-            }
-            dispositivo.EstadosId = (dispositivo.EstadosId == estadoAbierto.Id) ? estadoCerrado.Id : estadoAbierto.Id;
+                var nuevoRegistro = new RegistrosConsumo
+                {
+                    DispositivosId = dispositivo.ID,
+                    Inicio = DateTime.Now
+                };
 
-            try
-            {
+                _db.RegistrosConsumo.Add(nuevoRegistro);
+
                 await _db.SaveChangesAsync();
-                return Json(new { success = true });
+
+                return RedirectToAction("Consultar");
             }
-            catch (DbUpdateConcurrencyException)
+            else
             {
-                return Json(new { success = false, error = "Error al actualizar el estado del dispositivo." });
+                return RedirectToAction("Error", "Usuarios");
             }
         }
 
