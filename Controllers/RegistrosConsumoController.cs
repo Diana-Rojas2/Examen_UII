@@ -44,9 +44,8 @@ namespace Examen_UII.Controllers
                 var dispositivo = await _db.Dispositivos.FindAsync(registros.DispositivosId);
                 if (dispositivo != null)
                 {
-                    bool Admin = User.IsInRole("Administrador");
 
-                    if (dispositivo.UsuariosId == userId || Admin)
+                    if (dispositivo.UsuariosId == userId || User.IsInRole("Admin"))
                     {
                         var registroExistente = await _db.RegistrosConsumo
                             .Where(r => r.DispositivosId == registros.DispositivosId)
@@ -67,7 +66,14 @@ namespace Examen_UII.Controllers
 
                         await _db.SaveChangesAsync();
 
-                        return RedirectToAction("Consultar", "Dispositivos");
+                        if (User.IsInRole("Admin"))
+                        {
+                            return RedirectToAction("Consultar", "Dispositivos");
+                        }
+                        else
+                        {
+                            return RedirectToAction("Mapa", "Dispositivos");
+                        }
                     }
                     else
                     {

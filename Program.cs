@@ -34,6 +34,7 @@ if (!app.Environment.IsDevelopment())
 
 //app.MapHub<MensajeHub>("/WebSocketServer");
 app.MapHub<MapHub>("/mapHub");
+app.MapHub<NotificacionHub>("/notificacionHub");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 

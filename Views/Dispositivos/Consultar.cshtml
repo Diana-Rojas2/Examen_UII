@@ -60,6 +60,11 @@
                                         <button class="btn btn-primary" type="submit">Cambiar Estado</button>
                                     </form>
                                 }
+                                
+                                <form method="post" asp-action="Eliminar" class="mt-1">
+                                    <input type="hidden" name="id" value="@dispositivo.ID" />
+                                    <button class="btn btn-danger" type="submit">Eliminar</button>
+                                </form>
                             </td>
                         </tr>
                     }
@@ -68,23 +73,3 @@
         </div>
     </div>
 </div>
-@* @section scripts {
-<script>
-function cambiarEstado(id) {
-// Hacer una solicitud AJAX para cambiar el estado del dispositivo
-$.ajax({
-type: 'POST',
-url: '/Dispositivos/CambiarEstado', // Especifica la URL del controlador y la acción para cambiar el estado
-data: { id: id },
-success: function (response) {
-// Actualizar la página o mostrar un mensaje de éxito
-location.reload();
-},
-error: function () {
-// Mostrar un mensaje de error si la solicitud falla
-alert('Error al cambiar el estado del dispositivo.');
-}
-});
-}
-</script>
-} *@

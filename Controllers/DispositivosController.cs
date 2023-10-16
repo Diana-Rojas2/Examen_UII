@@ -23,11 +23,15 @@ namespace Examen_UII.Controllers
         private readonly AguaDBContext _db;
         private readonly IHubContext<MapHub> _hubContext;
 
-        public DispositivosController(AguaDBContext db, IHubContext<MapHub> hubContext)
+        private readonly IHubContext<NotificacionHub> _notificacionHubContext;
+
+        public DispositivosController(AguaDBContext db, IHubContext<MapHub> hubContext, IHubContext<NotificacionHub> notificacionHubContext)
         {
             _db = db;
             _hubContext = hubContext;
+            _notificacionHubContext = notificacionHubContext;
         }
+
 
         public IActionResult Mapa()
         {
@@ -111,7 +115,9 @@ namespace Examen_UII.Controllers
                     await _db.SaveChangesAsync();
 
                     return RedirectToAction("Consultar");
-                } else {
+                }
+                else
+                {
                     return RedirectToAction("Error", "Usuarios");
                 }
 
@@ -120,19 +126,20 @@ namespace Examen_UII.Controllers
             return View(dispositivo);
         }
 
+        [Authorize(Roles = "Admin")]
         public IActionResult Consultar()
         {
-            int userId = Convert.ToInt32(User.FindFirstValue("userId"));
+            /* int userId = Convert.ToInt32(User.FindFirstValue("userId"));
             if (User.IsInRole("Admin"))
-            {
-                var dispositivos = _db.Dispositivos
-                .Include(d => d.Usuarios)
-                .Include(d => d.Zonas)
-                .Include(d => d.Estados)
-                .ToList();
+            { */
+            var dispositivos = _db.Dispositivos
+            .Include(d => d.Usuarios)
+            .Include(d => d.Zonas)
+            .Include(d => d.Estados)
+            .ToList();
 
-                return View(dispositivos);
-            }
+            return View(dispositivos);
+            /* }
             else
             {
                 var dispositivos = _db.Dispositivos
@@ -143,9 +150,51 @@ namespace Examen_UII.Controllers
                 .ToList();
 
                 return View(dispositivos);
-            }
+            } */
 
         }
+
+        /* [HttpPost]
+        public async Task<IActionResult> CambiarEstado(int id)
+        {
+            var dispositivo = await _db.Dispositivos.FindAsync(id);
+
+            int userId = Convert.ToInt32(User.FindFirstValue("userId"));
+
+            if (dispositivo != null)
+            {
+                 if (dispositivo.UsuariosId == userId || User.IsInRole("Admin")) {
+                    dispositivo.EstadosId = 1;
+
+                    var nuevoRegistro = new RegistrosConsumo
+                    {
+                        DispositivosId = dispositivo.ID,
+                        Inicio = DateTime.Now
+                    };
+
+                    _db.RegistrosConsumo.Add(nuevoRegistro);
+
+                    await _db.SaveChangesAsync();
+
+                    if (User.IsInRole("Admin"))
+                    {
+                        return RedirectToAction("Mapa");
+                    }
+                    else
+                    {
+                        return RedirectToAction("Mapa");
+                    }
+
+                }else {
+                    return RedirectToAction("NoPermitido", "Usuarios");
+                }
+            }
+            else
+            {
+                return RedirectToAction("Error", "Usuarios");
+            }
+        } */
+
 
         [HttpPost]
         public async Task<IActionResult> CambiarEstado(int id)
@@ -154,11 +203,10 @@ namespace Examen_UII.Controllers
 
             int userId = Convert.ToInt32(User.FindFirstValue("userId"));
 
-            bool Admin = User.IsInRole("Administrador");
 
             if (dispositivo != null)
             {
-                if (dispositivo.UsuariosId == userId || Admin)
+                if (dispositivo.UsuariosId == userId || User.IsInRole("Admin"))
                 {
                     dispositivo.EstadosId = 1;
 
@@ -172,8 +220,20 @@ namespace Examen_UII.Controllers
 
                     await _db.SaveChangesAsync();
 
-                    return RedirectToAction("Consultar");
-                } else{
+                    var dispositivos = _db.Dispositivos.ToList();
+
+                    if (User.IsInRole("Admin"))
+                    {
+                        return RedirectToAction("Consultar");
+                    }
+                    else
+                    {
+                        return RedirectToAction("Mapa");
+                    }
+
+                }
+                else
+                {
                     return RedirectToAction("NoPermitido", "Usuarios");
                 }
             }
@@ -183,5 +243,26 @@ namespace Examen_UII.Controllers
             }
         }
 
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        public async Task<IActionResult> Eliminar(int id)
+        {
+            var dispositivo = await _db.Dispositivos.FindAsync(id);
+
+            if (dispositivo != null)
+            {
+                _db.Dispositivos.Remove(dispositivo);
+                await _db.SaveChangesAsync();
+
+                return RedirectToAction("Consultar");
+            }
+            else
+            {
+                return RedirectToAction("Error", "Usuarios");
+            }
+        }
+
+       
     }
 }

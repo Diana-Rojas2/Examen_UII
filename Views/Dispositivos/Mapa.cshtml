@@ -29,13 +29,6 @@
     <script>
         var markers = {};
 
-        var connection = new signalR.HubConnectionBuilder().withUrl("/mapHub").build();
-
-        connection.on("NuevasCoordenadas", function (latitud, longitud) {
-            document.getElementById("Latitud").value = latitud;
-            document.getElementById("Longitud").value = longitud;
-        });
-
         var map = L.map('map').setView([19.8160106, -97.35705759999999], 13);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
@@ -44,33 +37,32 @@
         @foreach (var dispositivo in Model)
         {
             <text>
-                // Determina el ícono y color del marcador según el estado
-                var icon;
-                var estadoId = @dispositivo.EstadosId;
-                if (estadoId === 1) {
-                    icon = L.icon({
-                        iconUrl: 'https://cdn.pixabay.com/photo/2014/04/03/10/03/google-309741_1280.png',
-                        iconSize: [25, 41],
-                        iconAnchor: [12, 41],
-                        popupAnchor: [1, -34]
-                    });
-                } else if (estadoId === 2) {
-                    icon = L.icon({
-                        iconUrl: 'https://cdn.pixabay.com/photo/2014/04/03/10/03/google-309740_960_720.png',
-                        iconSize: [25, 41],
-                        iconAnchor: [12, 41],
-                        popupAnchor: [1, -34]
-                    });
-                }
+                    var icon;
+                    var estadoId = @dispositivo.EstadosId;
+                    if (estadoId === 1) {
+                        icon = L.icon({
+                            iconUrl: 'https://cdn.pixabay.com/photo/2014/04/03/10/03/google-309741_1280.png',
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 41],
+                            popupAnchor: [1, -34]
+                        });
+                       } else if (estadoId === 2) {
+                        icon = L.icon({
+                            iconUrl: 'https://cdn.pixabay.com/photo/2014/04/03/10/03/google-309740_960_720.png',
+                            iconSize: [25, 41],
+                            iconAnchor: [12, 41],
+                            popupAnchor: [1, -34]
+                        });
+                         }
 
-                var marker = L.marker([@dispositivo.Latitud, @dispositivo.Longitud], { icon: icon }).addTo(map);
-                marker.bindPopup("ID: @dispositivo.Identificador").openPopup();
+                    var marker = L.marker([@dispositivo.Latitud, @dispositivo.Longitud], {icon: icon }).addTo(map);
+                    marker.bindPopup("ID: @dispositivo.Identificador").openPopup();
 
-                markers[@dispositivo.ID] = marker;
+                    markers[@dispositivo.ID] = marker;
 
-                marker.on('click', function (e) {
-                    var dispositivoId = @dispositivo.ID; 
-                    var estadoId = @dispositivo.EstadosId; 
+                    marker.on('click', function (e) {
+                                                        var dispositivoId = @dispositivo.ID;
+                    var estadoId = @dispositivo.EstadosId;
                     document.getElementById("EstadoId").value = estadoId;
 
                     var hiddenField = estadoId === 1 ? "dispositivoId" : "id";
@@ -80,13 +72,11 @@
                     input.name = hiddenField;
                     input.value = dispositivoId;
                     document.getElementById("deviceForm").appendChild(input);
-                });
+                                                    });
             </text>
         }
 
-        document.getElementById("map").style.cursor = "not-allowed"; // Deshabilitar el cursor del mapa
-
-        
+            document.getElementById("map").style.cursor = "not-allowed";
 
         document.getElementById("deviceForm").onsubmit = function () {
             var estadoId = document.getElementById("EstadoId").value;
@@ -99,4 +89,5 @@
             }
         };
     </script>
+
 </div>
