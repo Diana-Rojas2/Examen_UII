@@ -13,5 +13,10 @@ namespace Examen_UII.Models
         public string Password { get; set; }
         public int RolesId { get; set; }
         public Roles Roles { get; set; }
+
+        internal static string IsInRole(string v)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

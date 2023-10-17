@@ -97,7 +97,6 @@ namespace Examen_UII.Controllers
                     _db.Dispositivos.Add(dispositivo);
 
                     await _db.SaveChangesAsync();
-
                     var registroConsumo = new RegistrosConsumo
                     {
                         DispositivosId = dispositivo.ID,
@@ -107,19 +106,19 @@ namespace Examen_UII.Controllers
 
                     await _db.SaveChangesAsync();
 
-                    return RedirectToAction("Consultar");
                 }
                 else if (dispositivo.EstadosId == 2)
                 {
                     _db.Dispositivos.Add(dispositivo);
                     await _db.SaveChangesAsync();
 
-                    return RedirectToAction("Consultar");
                 }
                 else
                 {
                     return RedirectToAction("Error", "Usuarios");
                 }
+                await _notificacionHubContext.Clients.All.SendAsync("DeviceCreate", dispositivo.ID);
+                return RedirectToAction("Consultar");
 
             }
 
@@ -129,9 +128,7 @@ namespace Examen_UII.Controllers
         [Authorize(Roles = "Admin")]
         public IActionResult Consultar()
         {
-            /* int userId = Convert.ToInt32(User.FindFirstValue("userId"));
-            if (User.IsInRole("Admin"))
-            { */
+
             var dispositivos = _db.Dispositivos
             .Include(d => d.Usuarios)
             .Include(d => d.Zonas)
@@ -139,70 +136,14 @@ namespace Examen_UII.Controllers
             .ToList();
 
             return View(dispositivos);
-            /* }
-            else
-            {
-                var dispositivos = _db.Dispositivos
-                .Include(d => d.Usuarios)
-                .Include(d => d.Zonas)
-                .Include(d => d.Estados)
-                .Where(d => d.UsuariosId == userId)
-                .ToList();
-
-                return View(dispositivos);
-            } */
 
         }
-
-        /* [HttpPost]
-        public async Task<IActionResult> CambiarEstado(int id)
-        {
-            var dispositivo = await _db.Dispositivos.FindAsync(id);
-
-            int userId = Convert.ToInt32(User.FindFirstValue("userId"));
-
-            if (dispositivo != null)
-            {
-                 if (dispositivo.UsuariosId == userId || User.IsInRole("Admin")) {
-                    dispositivo.EstadosId = 1;
-
-                    var nuevoRegistro = new RegistrosConsumo
-                    {
-                        DispositivosId = dispositivo.ID,
-                        Inicio = DateTime.Now
-                    };
-
-                    _db.RegistrosConsumo.Add(nuevoRegistro);
-
-                    await _db.SaveChangesAsync();
-
-                    if (User.IsInRole("Admin"))
-                    {
-                        return RedirectToAction("Mapa");
-                    }
-                    else
-                    {
-                        return RedirectToAction("Mapa");
-                    }
-
-                }else {
-                    return RedirectToAction("NoPermitido", "Usuarios");
-                }
-            }
-            else
-            {
-                return RedirectToAction("Error", "Usuarios");
-            }
-        } */
-
 
         [HttpPost]
         public async Task<IActionResult> CambiarEstado(int id)
         {
             var dispositivo = await _db.Dispositivos.FindAsync(id);
-
             int userId = Convert.ToInt32(User.FindFirstValue("userId"));
-
 
             if (dispositivo != null)
             {
@@ -220,16 +161,8 @@ namespace Examen_UII.Controllers
 
                     await _db.SaveChangesAsync();
 
-                    var dispositivos = _db.Dispositivos.ToList();
-
-                    if (User.IsInRole("Admin"))
-                    {
-                        return RedirectToAction("Consultar");
-                    }
-                    else
-                    {
-                        return RedirectToAction("Mapa");
-                    }
+                    await _notificacionHubContext.Clients.All.SendAsync("DeviceOpened", id);
+                    return RedirectToAction("Mapa");
 
                 }
                 else
@@ -254,7 +187,7 @@ namespace Examen_UII.Controllers
             {
                 _db.Dispositivos.Remove(dispositivo);
                 await _db.SaveChangesAsync();
-
+                await _notificacionHubContext.Clients.All.SendAsync("DeviceDelete", id);
                 return RedirectToAction("Consultar");
             }
             else
@@ -263,6 +196,76 @@ namespace Examen_UII.Controllers
             }
         }
 
-       
+        [Authorize(Roles = "Admin")]
+        public IActionResult GraficaEstados()
+        {
+            return View();
+        }
+        public IActionResult ObtenerDatosDispositivos()
+        {
+            try
+            {
+                var dispositivosAbiertos = _db.Dispositivos.Count(d =>
+                d.EstadosId == 1);
+                var dispositivosCerrados = _db.Dispositivos.Count(d =>
+                d.EstadosId == 2);
+                var data = new
+                {
+                    Abiertos = dispositivosAbiertos,
+                    Cerrados = dispositivosCerrados
+                };
+                var jsonData = Json(data);
+                return jsonData;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al obtener datos de dispositivos: {ex.Message} ");
+                return StatusCode(500, "Error interno del servidor");
+            }
+        }
+
+        [Authorize(Roles = "Admin")]
+        public IActionResult GraficaDatos()
+        {
+            return View();
+        }
+        public IActionResult ObtenerDatos()
+        {
+            try
+            {
+                var dispositivos = _db.Dispositivos.Include(d => d.RegistrosConsumo).ToList();
+                var data = new List<object>();
+
+                foreach (var dispositivo in dispositivos)
+                {
+                    var litrosRegistrados = dispositivo.RegistrosConsumo.Sum(r => r.CantidadLitrosRegistrados);
+                    int estadoId = dispositivo.EstadosId;
+                    int estado = estadoId == 1 ? 1 : 2;
+
+                    var dispositivoData = new
+                    {
+                        Id = dispositivo.ID,
+                        Prioridad = dispositivo.Prioridad,
+                        Zona = dispositivo.ZonasId,
+                        LitrosRegistrados = litrosRegistrados,
+                        Estado = estado
+                    };
+                    data.Add(dispositivoData);
+                }
+
+                return Json(data);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al obtener datos de dispositivos: {ex.Message}");
+                return StatusCode(500, "Error interno del servidor");
+            }
+        }
+
+        public IActionResult ErrorD()
+        {
+            return View();
+        }
+
     }
 }

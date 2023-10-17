@@ -104,7 +104,7 @@
         document.getElementById("Longitud").value = longitud;
     });
 
-    var map = L.map('map').setView([19.813033780427087, -97.34512172937008], 9);
+    var map = L.map('map').setView([19.813033780427087, -97.34512172937008], 13);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         maxZoom: 19,
     }).addTo(map);
@@ -120,11 +120,9 @@
         var latitud = e.latlng.lat;
         var longitud = e.latlng.lng;
 
-        // Establece las coordenadas en los campos ocultos
         document.getElementById("Latitud").value = latitud;
         document.getElementById("Longitud").value = longitud;
 
-        // Envía las coordenadas al servidor a través de SignalR
         connection.invoke("NuevasCoordenadas", latitud, longitud).catch(function (err) {
             console.error(err.toString());
         });

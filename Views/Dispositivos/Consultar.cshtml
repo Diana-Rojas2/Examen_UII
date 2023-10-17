@@ -16,7 +16,7 @@
         <div class="col">
             <h2 class="text-center">Dispositivos registrados</h2>
             <br>
-            <table class="table table-striped">
+            <table id="dispositivosTable" class="table table-striped">
                 <thead>
                     <tr>
                         <th>Identificador</th>
@@ -34,7 +34,7 @@
                 <tbody>
                     @foreach (var dispositivo in Model)
                     {
-                        <tr>
+                        <tr id="@("dispositivo-" + dispositivo.ID)">
                             <td>@dispositivo.Identificador</td>
                             <td>@dispositivo.DireccionMAC</td>
                             <td>@dispositivo.Descripcion</td>
@@ -45,22 +45,6 @@
                             <td>@dispositivo.Zonas.Nombre</td>
                             <td>@dispositivo.Estados.Nombre</td>
                             <td>
-                                @if (@dispositivo.Estados.Nombre == "Abierto")
-                                {
-                                    <form method="get" asp-controller="RegistrosConsumo" asp-action="Registrar">
-                                        <input type="hidden" name="dispositivoId" value="@dispositivo.ID" />
-                                        <button class="btn btn-primary" type="submit" class="btn btn-primary">Cambiar
-                                            Estado</button>
-                                    </form>
-                                }
-                                else
-                                {
-                                    <form method="post" asp-action="CambiarEstado">
-                                        <input type="hidden" name="id" value="@dispositivo.ID" />
-                                        <button class="btn btn-primary" type="submit">Cambiar Estado</button>
-                                    </form>
-                                }
-                                
                                 <form method="post" asp-action="Eliminar" class="mt-1">
                                     <input type="hidden" name="id" value="@dispositivo.ID" />
                                     <button class="btn btn-danger" type="submit">Eliminar</button>
@@ -73,3 +57,41 @@
         </div>
     </div>
 </div>
+<script src="~/js/SignalR.js"></script>
+<script>
+    ////// notificacion Eliminacion
+    var connection = new signalR.HubConnectionBuilder()
+        .withUrl("/notificacionHub")
+        .build();
+
+    connection.start().then(function () {
+        console.log("Conexión de SignalR establecida.");
+    }).catch(function (err) {
+        console.error("Error de conexión SignalR: " + err);
+    });
+
+    connection.on("DeviceCreate", function (dispositivoId) {
+        MostrarNotificaciones(`El dispositivo ${dispositivoId} se ha creado.`);
+    });
+
+    connection.on("DeviceDelete", function (dispositivoId) {
+        MostrarNotificaciones(`El dispositivo ${dispositivoId} se ha eliminado.`);
+    });
+
+    function MostrarNotificaciones(msj) {
+        if (!(Notification) in window) {
+            alert("El navegador no soporta notificaciones");
+        }
+        else if (Notification.permission === "granted") {
+            const noti = new Notification(msj);
+
+        }
+        else if (Notification.permission !== "denied") {
+            Notification.requestPermission(function (p) {
+                if (Notification.permission === "granted") {
+                    const ns = new Notification("Permiso autorizado");
+                }
+            });
+        }
+    }
+</script>

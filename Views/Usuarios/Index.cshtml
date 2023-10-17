@@ -9,3 +9,16 @@
         <h4 class="text-end" style="color: rgb(0, 157, 255);">Iniciaste sesión como: @ViewData["UserName"]</h4>
     }
 </div>
+
+
+
+<script src="~/js/SignalR.js"></script>
+<script>
+    const conexion = new signalR.HubConnectionBuilder().withUrl("/notificacionHub").build();
+
+    conexion.start().then(function (e) {
+        console.log("Conexión exitosa");
+    }).catch((e) => {
+        console.error("Error al conectarse al servidor de websockets");
+    })
+</script>

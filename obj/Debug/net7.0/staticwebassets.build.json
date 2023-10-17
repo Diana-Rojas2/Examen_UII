@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "EbR8wJQd8PKYLxvCZrG5Xyae1ra11a+tZ1p2zPhr93w=",
+  "Hash": "8DYoMRaiBlkO6OAlw5nDwoM0sbZaaLphsz/ghr+CSaM=",
   "Source": "Examen_UII",
   "BasePath": "_content/Examen_UII",
   "Mode": "Default",
@@ -85,12 +85,12 @@
       "OriginalItemSpec": "wwwroot\\favicon.ico"
     },
     {
-      "Identity": "C:\\IQ4B\\Examen_UII\\wwwroot\\js\\signalr.js",
+      "Identity": "C:\\IQ4B\\Examen_UII\\wwwroot\\js\\SignalR.js",
       "SourceId": "Examen_UII",
       "SourceType": "Discovered",
       "ContentRoot": "C:\\IQ4B\\Examen_UII\\wwwroot\\",
       "BasePath": "_content/Examen_UII",
-      "RelativePath": "js/signalr.js",
+      "RelativePath": "js/SignalR.js",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Primary",
@@ -99,7 +99,7 @@
       "AssetTraitValue": "",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\js\\signalr.js"
+      "OriginalItemSpec": "wwwroot\\js\\SignalR.js"
     },
     {
       "Identity": "C:\\IQ4B\\Examen_UII\\wwwroot\\js\\site.js",

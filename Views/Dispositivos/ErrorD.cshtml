@@ -1,16 +1,13 @@
-@model Examen_UII.Models.Usuarios
-
+@model Examen_UII.Models.Dispositivos
 @{
-    ViewData["Title"] = "Error";
+    ViewData["Title"] = "ErrorD";
 }
-
-<h1>@ViewData["Title"]</h1>
 
 <div>
     <center>
-        <img src="https://www.questionpro.com/userimages/site_media/calculadora-margen-de-error.png" alt="Error"
+        <img src="https://www.tec.ac.cr/sites/default/files/media/accesodenegado.png" alt="Error"
             class="img-fluid" style="width: 300px;"></img>
-        <h3 class="text-danger text-center">Lo sentimos, ha ocurrido un error</h3>
+        <h3 class="text-danger text-center">Lo sentimos, No puedes cerrar el último dispositivo abierto.</h3>
     </center>
 </div>
 <script src="~/js/SignalR.js"></script>
@@ -25,7 +22,6 @@
         console.error("Error de conexión SignalR: " + err);
     });
 
-    // Escuchar la notificación del cierre del último dispositivo abierto
     connection.on("NotificacionCerrarUltimo", function (mensaje) {
         MostrarNotificaciones(mensaje);
     });

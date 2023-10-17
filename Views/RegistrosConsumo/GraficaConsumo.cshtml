@@ -1,0 +1,50 @@
+@model IEnumerable<Examen_UII.Models.RegistrosConsumo>
+@{
+    ViewData["Title"] = "GraficaConsumo";
+}
+
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
+</head>
+<h2 class="text-center">Grafica Consumo Total</h2>
+<div style="width: 500px; height: 500px;">
+    <canvas id="graficaEstados" width="600" height="600"></canvas>
+</div>
+<script>
+    fetch('/RegistrosConsumo/ObtenerLitros')
+        .then(response => response.json())
+        .then(data => {
+            var ctx =
+                document.getElementById('graficaEstados').getContext('2d');
+            var myChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Litros consumidos'],
+                    datasets: [{
+                        label: 'Consumo global de agua',
+                        data: [data.totalLitrosRegistrados],
+                        backgroundColor: [
+                            'rgba(75, 192, 192, 0.2)',
+                            'rgba(255, 99, 132, 0.2)'
+                        ],
+                        borderColor: [
+                            'rgba(75, 192, 192, 1)',
+                            'rgba(255, 99, 132, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Error al obtener datos de dispositivos:', error);
+        });
+</script>

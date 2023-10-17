@@ -1,0 +1,35 @@
+@model IEnumerable<Examen_UII.Models.RegistrosConsumo>
+
+@{
+    ViewData["Title"] = "Consultar";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col">
+            <h2 class="text-center">Registros consumo</h2>
+            <br>
+            <table id="dispositivosTable" class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Dispositivo</th>
+                        <th>Inicio</th>
+                        <th>Fin</th>
+                        <th>Litros</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var registros in Model)
+                    {
+                        <tr>
+                            <td>@registros.DispositivosId</td>
+                            <td>@registros.Inicio</td>
+                            <td>@registros.Fin</td>
+                            <td>@registros.CantidadLitrosRegistrados</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

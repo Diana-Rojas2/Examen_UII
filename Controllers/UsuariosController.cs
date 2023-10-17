@@ -55,8 +55,8 @@ namespace _2._5_WebSockets.Controllers
         [Authorize]
         public IActionResult Index()
         {
-            var username = User.FindFirstValue(ClaimTypes.NameIdentifier); // Obtener el correo del usuario
-            ViewData["UserName"] = username; // Agregar el correo a la ViewData
+            var username = User.FindFirstValue(ClaimTypes.NameIdentifier); 
+            ViewData["UserName"] = username; 
             return View();
         }
 

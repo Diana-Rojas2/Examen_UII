@@ -20,10 +20,13 @@ namespace Examen_UII.Controllers
         private readonly AguaDBContext _db;
         private readonly IHubContext<MapHub> _hubContext;
 
-        public RegistrosConsumoController(AguaDBContext db, IHubContext<MapHub> hubContext)
+        private readonly IHubContext<NotificacionHub> _notificacionHubContext;
+
+        public RegistrosConsumoController(AguaDBContext db, IHubContext<MapHub> hubContext, IHubContext<NotificacionHub> notificacionHubContext)
         {
             _db = db;
             _hubContext = hubContext;
+            _notificacionHubContext = notificacionHubContext;
         }
 
         [HttpGet]
@@ -33,20 +36,26 @@ namespace Examen_UII.Controllers
             return View();
         }
 
-        [HttpPost]
         public async Task<IActionResult> Registrar(RegistrosConsumo registros)
         {
             if (ModelState.IsValid)
             {
                 registros.Fin = DateTime.Now;
-
                 int userId = Convert.ToInt32(User.FindFirstValue("userId"));
                 var dispositivo = await _db.Dispositivos.FindAsync(registros.DispositivosId);
+
                 if (dispositivo != null)
                 {
-
                     if (dispositivo.UsuariosId == userId || User.IsInRole("Admin"))
                     {
+                        var ultimoAbierto = _db.Dispositivos.Count(d => d.EstadosId == 1) == 1 && dispositivo.EstadosId == 1;
+
+                        if (ultimoAbierto)
+                        {
+                            await _notificacionHubContext.Clients.All.SendAsync("NotificacionCerrarUltimo", "No puedes cerrar el último dispositivo abierto.");
+                            return RedirectToAction("errorD", "Dispositivos");
+                        }
+
                         var registroExistente = await _db.RegistrosConsumo
                             .Where(r => r.DispositivosId == registros.DispositivosId)
                             .OrderByDescending(r => r.Inicio)
@@ -65,26 +74,54 @@ namespace Examen_UII.Controllers
                         dispositivo.EstadosId = 2;
 
                         await _db.SaveChangesAsync();
-
-                        if (User.IsInRole("Admin"))
-                        {
-                            return RedirectToAction("Consultar", "Dispositivos");
-                        }
-                        else
-                        {
-                            return RedirectToAction("Mapa", "Dispositivos");
-                        }
+                        await _notificacionHubContext.Clients.All.SendAsync("DeviceClosed", registros.DispositivosId);
+                        return RedirectToAction("Mapa", "Dispositivos");
                     }
                     else
                     {
                         return RedirectToAction("NoPermitido", "Usuarios");
                     }
+
                 }
             }
-
             return View(registros);
         }
 
+
+
+        [Authorize(Roles = "Admin")]
+        public IActionResult Consultar()
+        {
+
+            var registros = _db.RegistrosConsumo
+            .Include(r => r.Dispositivos)
+            .ToList();
+            return View(registros);
+        }
+
+        [Authorize(Roles = "Admin")]
+        public IActionResult GraficaConsumo()
+        {
+            return View();
+        }
+        public IActionResult ObtenerLitros()
+        {
+            try
+            {
+                var totalLitrosRegistrados = _db.RegistrosConsumo.Sum(r =>
+                r.CantidadLitrosRegistrados);
+                var data = new
+                {
+                    TotalLitrosRegistrados = totalLitrosRegistrados
+                };
+                return Json(data);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error al obtener datos de dispositivos: {ex.Message}");
+                return StatusCode(500, "Error interno del servidor");
+            }
+        }
 
     }
 }

@@ -28,32 +28,45 @@
                             <li class="nav-item">
                                 <a class="nav-link active" asp-action="Index" asp-controller="Usuarios">Inicio</a>
                             </li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown"
-                                    aria-expanded="false">
-                                    Dispositivos
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" asp-action="Consultar" asp-controller="Dispositivos">Tabla</a></li>
-                                    
-                                    <li><a class="dropdown-item" asp-action="Mapa"asp-controller="Dispositivos">Mapa</a></li>
-                                </ul>
-                            </li>
+
                             @if (User.IsInRole("Admin"))
                             {
-                                
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                        Dispositivos
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-action="Consultar"
+                                                asp-controller="Dispositivos">Tabla</a></li>
+
+                                        <li><a class="dropdown-item" asp-action="Mapa" asp-controller="Dispositivos">Mapa</a>
+                                        </li>
+                                    </ul>
+                                </li>
+                                <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown"
+                                    aria-expanded="false">
+                                    Graficas
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" asp-action="GraficaDatos" asp-controller="Dispositivos">Datos</a></li>
+                                    
+                                    <li><a class="dropdown-item" asp-action="GraficaEstados"asp-controller="Dispositivos">Estados</a></li>
+                                    
+                                    <li><a class="dropdown-item" asp-action="GraficaConsumo"asp-controller="RegistrosConsumo">Consumo</a></li>
+                                </ul>
+                            </li>
+
                             }
                             else
                             {
-                                
-
+                                <li><a class="dropdown-item" asp-action="Mapa" asp-controller="Dispositivos">Cambiar Estados</a></li>
                             }
                             <li class="nav-item">
                                 <a class="nav-link active" asp-action="CerrarSesion" asp-controller="Usuarios">Cerrar
                                     Sesión</a>
                             </li>
-
-
                         }
                         else
                         {

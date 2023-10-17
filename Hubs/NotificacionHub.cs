@@ -1,3 +1,5 @@
+using Examen_UII.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
 using System.Threading.Tasks;
 
@@ -5,19 +7,39 @@ namespace Examen_UII.Hubs
 {
     public class NotificacionHub : Hub
     {
-        public async Task EnviarNotificacion(string mensaje)
+        private readonly AguaDBContext _db;
+        private readonly UserManager<AguaDBContext> _userManager;
+
+
+        public NotificacionHub(AguaDBContext db)
         {
-            await Clients.All.SendAsync("RecibirNotificacion", mensaje);
+            _db = db;
         }
 
-        public async Task NotificarDispositivoCerrado()
+
+        public async Task NotificarApertura(int dispositivoId)
         {
-            await Clients.All.SendAsync("MostrarNotificacionDispositivoCerrado");
+            await Clients.All.SendAsync("DeviceOpened", dispositivoId);
         }
 
-        public async Task NotificarDispositivosCerrados()
+        public async Task NotificarCierre(int dispositivoId)
         {
-            await Clients.All.SendAsync("MostrarNotificacionDispositivosCerrados");
+            await Clients.All.SendAsync("DeviceClosed", dispositivoId);
+        }
+
+        public async Task NotificarCreado(int dispositivoId)
+        {
+            await Clients.All.SendAsync("DeviceCreate", dispositivoId);
+        }
+
+        public async Task NotificarEliminado(int dispositivoId)
+        {
+            await Clients.All.SendAsync("DeviceDelete", dispositivoId);
+        }
+
+        public async Task NotificacionCerrarUltimo(string mensaje)
+        {
+            await Clients.All.SendAsync("NotificacionTodosCerrados", mensaje);
         }
 
     }
