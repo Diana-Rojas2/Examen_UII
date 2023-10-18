@@ -8,7 +8,6 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 </head>
 
-<h2 class="text-center">Grafica Datos</h2>
 
 <div style="width: 500px; height: 500px;">
     <canvas id="graficaPrioridades" width="600" height="600"></canvas>
@@ -25,7 +24,7 @@
             var estados = []; // Agrega un array para los estados
 
             data.forEach(dispositivo => {
-                labels.push(Dispositivo ${dispositivo.id});
+                labels.push(`Dispositivo ${dispositivo.id}`);
                 prioridades.push(dispositivo.prioridad);
                 zonas.push(dispositivo.zona);
                 litrosRegistrados.push(dispositivo.litrosRegistrados);

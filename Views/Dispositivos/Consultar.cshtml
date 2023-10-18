@@ -3,20 +3,20 @@
 @{
     ViewData["Title"] = "Consultar";
 }
+
 @if (User.IsInRole("Admin"))
 {
-
     <form method="get" asp-action="Registrar">
         <button class="btn btn-primary" type="submit">Agregar un Dispositivo</button>
     </form>
-
 }
+
 <div class="container">
     <div class="row justify-content-center">
         <div class="col">
             <h2 class="text-center">Dispositivos registrados</h2>
             <br>
-            <table id="dispositivosTable" class="table table-striped">
+            <table id="tablaDispositivos" class="table table-striped">
                 <thead>
                     <tr>
                         <th>Identificador</th>
@@ -32,66 +32,89 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach (var dispositivo in Model)
-                    {
-                        <tr id="@("dispositivo-" + dispositivo.ID)">
-                            <td>@dispositivo.Identificador</td>
-                            <td>@dispositivo.DireccionMAC</td>
-                            <td>@dispositivo.Descripcion</td>
-                            <td>@dispositivo.Prioridad</td>
-                            <td>@dispositivo.Latitud</td>
-                            <td>@dispositivo.Longitud</td>
-                            <td>@dispositivo.Usuarios.Nombre</td>
-                            <td>@dispositivo.Zonas.Nombre</td>
-                            <td>@dispositivo.Estados.Nombre</td>
-                            <td>
-                                <form method="post" asp-action="Eliminar" class="mt-1">
-                                    <input type="hidden" name="id" value="@dispositivo.ID" />
-                                    <button class="btn btn-danger" type="submit">Eliminar</button>
-                                </form>
-                            </td>
-                        </tr>
-                    }
                 </tbody>
             </table>
+
         </div>
     </div>
 </div>
+
 <script src="~/js/SignalR.js"></script>
 <script>
-    ////// notificacion Eliminacion
-    var connection = new signalR.HubConnectionBuilder()
-        .withUrl("/notificacionHub")
-        .build();
+    var conexion = new signalR.HubConnectionBuilder().withUrl("/notificacionHub").build();
 
-    connection.start().then(function () {
-        console.log("Conexión de SignalR establecida.");
-    }).catch(function (err) {
-        console.error("Error de conexión SignalR: " + err);
-    });
+    conexion.start().then(function (e) {
+        console.log("Conexión exitosa");
+    }).catch((e) => {
+        console.error("Error al conectarse al servidor de websockets");
+    })
 
-    connection.on("DeviceCreate", function (dispositivoId) {
-        MostrarNotificaciones(`El dispositivo ${dispositivoId} se ha creado.`);
-    });
+    async function GetDispositivos() {
+        const respuesta = await fetch("http://localhost:5166/Dispositivos/GetDispositivos");
+        const dispositivos = await respuesta.json();
+        console.log(dispositivos);
 
-    connection.on("DeviceDelete", function (dispositivoId) {
-        MostrarNotificaciones(`El dispositivo ${dispositivoId} se ha eliminado.`);
-    });
+        const tabla = document.getElementById("tablaDispositivos");
+        const tbody = tabla.querySelector("tbody");
 
-    function MostrarNotificaciones(msj) {
-        if (!(Notification) in window) {
-            alert("El navegador no soporta notificaciones");
-        }
-        else if (Notification.permission === "granted") {
-            const noti = new Notification(msj);
+        tbody.innerHTML = "";
 
-        }
-        else if (Notification.permission !== "denied") {
-            Notification.requestPermission(function (p) {
-                if (Notification.permission === "granted") {
-                    const ns = new Notification("Permiso autorizado");
-                }
-            });
+        // Iterar sobre las películas y agregar una fila por cada una
+        dispositivos.forEach(dispositivo => {
+            const fila = document.createElement("tr");
+            fila.innerHTML = `
+            <td>${dispositivo.identificador}</td>
+            <td>${dispositivo.direccionMAC}</td>
+            <td>${dispositivo.descripcion}</td>
+            <td>${dispositivo.prioridad}</td>
+            <td>${dispositivo.latitud}</td>
+            <td>${dispositivo.longitud}</td>
+            <td>${dispositivo.usuariosId}</td>
+            <td>${dispositivo.zonasId}</td>
+            <td>${dispositivo.estadosId}</td>
+            <td>
+                <button class="btn btn-danger" onclick="EliminarDispositivo(${dispositivo.id})">Eliminar</button>
+            </td>
+            `;
+
+            // Establecer un atributo "data-deviceid" para identificar la fila.
+            fila.setAttribute("data-deviceid", dispositivo.id);
+            tbody.appendChild(fila);
+        });
+    }
+
+    async function EliminarDispositivo(id) {
+        const respuesta = await fetch("http://localhost:5166/Dispositivos/Eliminar", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(id), // Envía solo el ID como número entero.
+        });
+
+        if (respuesta.status === 200) {
+            // Eliminación exitosa, eliminar la fila de la tabla
+            const fila = document.querySelector(`tr[data-deviceid="${id}"]`);
+            if (fila) {
+                fila.remove();
+            }
         }
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        GetDispositivos();
+    });
+
+    conexion.on("AgregarATabla", () => {
+        GetDispositivos();
+    })
+
+    conexion.on("DeviceDelete", function (deviceId) {
+        // Busca la fila de la tabla correspondiente al dispositivo eliminado y elimínala.
+        var fila = document.querySelector(`#tablaDispositivos tr[data-deviceid="${deviceId}"]`);
+        if (fila) {
+            fila.remove();
+        }
+    });
+
 </script>

@@ -45,24 +45,35 @@
                                     </ul>
                                 </li>
                                 <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown"
-                                    aria-expanded="false">
-                                    Graficas
-                                </a>
-                                <ul class="dropdown-menu">
-                                    <li><a class="dropdown-item" asp-action="GraficaDatos" asp-controller="Dispositivos">Datos</a></li>
-                                    
-                                    <li><a class="dropdown-item" asp-action="GraficaEstados"asp-controller="Dispositivos">Estados</a></li>
-                                    
-                                    <li><a class="dropdown-item" asp-action="GraficaConsumo"asp-controller="RegistrosConsumo">Consumo</a></li>
-                                </ul>
-                            </li>
+                                    <a class="nav-link dropdown-toggle active" href="#" role="button" data-bs-toggle="dropdown"
+                                        aria-expanded="false">
+                                        Graficas
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-action="GraficaDatos"
+                                                asp-controller="Dispositivos">Datos</a></li>
+
+                                        <li><a class="dropdown-item" asp-action="GraficaEstados"
+                                                asp-controller="Dispositivos">Estados</a></li>
+
+                                        <li><a class="dropdown-item" asp-action="GraficaConsumo"
+                                                asp-controller="RegistrosConsumo">Consumo</a></li>
+                                    </ul>
+                                </li>
 
                             }
                             else
                             {
-                                <li><a class="dropdown-item" asp-action="Mapa" asp-controller="Dispositivos">Cambiar Estados</a></li>
+                                <li class="nav-item">
+                                    <a class="nav-link active" asp-action="Mapa" asp-controller="Dispositivos">Cambiar
+                                        Estados</a>
+                                </li>
                             }
+                            <li class="nav-item">
+                                <a class="nav-link active" asp-controller="RegistrosConsumo"
+                                    asp-action="Consultar">Registros de consumo</a>
+                            </li>
+
                             <li class="nav-item">
                                 <a class="nav-link active" asp-action="CerrarSesion" asp-controller="Usuarios">Cerrar
                                     Sesión</a>
@@ -93,6 +104,62 @@
             &copy; 2023 - Examen_UII - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
         </div>
     </footer>
+    @if (User.Identity.IsAuthenticated)
+    {
+        @if (User.IsInRole("Admin"))
+        {
+            <script src="~/js/SignalR.js"></script>
+
+            <script>
+                var connection = new signalR.HubConnectionBuilder()
+                    .withUrl("/notificacionHub")
+                    .build();
+
+                connection.start().then(function () {
+                    console.log("Conexión de SignalR establecida.");
+                }).catch(function (err) {
+                    console.error("Error de conexión SignalR: " + err);
+                });
+
+                connection.on("DeviceCreate", function (dispositivoId) {
+                    MostrarNotificaciones(`El dispositivo ${dispositivoId} se ha creado.`);
+                });
+
+                connection.on("DeviceDelete", function (dispositivoId) {
+                    MostrarNotificaciones(`El dispositivo ${dispositivoId} se ha eliminado.`);
+                });
+
+                connection.on("DeviceOpened", function (dispositivoId) {
+                    MostrarNotificaciones(`El dispositivo ${dispositivoId} se ha abierto.`);
+                });
+
+                connection.on("DeviceClosed", function (dispositivoId) {
+                    MostrarNotificaciones(`El dispositivo ${dispositivoId} se ha cerrado.`);
+                });
+
+                connection.on("NotificacionCerrarUltimo", function (mensaje) {
+                    MostrarNotificaciones(mensaje);
+                });
+
+                function MostrarNotificaciones(msj) {
+                    if (!(Notification) in window) {
+                        alert("El navegador no soporta notificaciones");
+                    }
+                    else if (Notification.permission === "granted") {
+                        const noti = new Notification(msj);
+
+                    }
+                    else if (Notification.permission !== "denied") {
+                        Notification.requestPermission(function (p) {
+                            if (Notification.permission === "granted") {
+                                const ns = new Notification("Permiso autorizado");
+                            }
+                        });
+                    }
+                }
+            </script>
+        }
+    }
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

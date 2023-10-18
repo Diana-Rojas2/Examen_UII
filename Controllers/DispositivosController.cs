@@ -1,10 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Data.Common;
-using System.Diagnostics;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Examen_UII.Hubs;
 using Examen_UII.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -12,8 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-
+using System.Text.Json;
 
 namespace Examen_UII.Controllers
 {
@@ -21,14 +14,12 @@ namespace Examen_UII.Controllers
     public class DispositivosController : Controller
     {
         private readonly AguaDBContext _db;
-        private readonly IHubContext<MapHub> _hubContext;
 
         private readonly IHubContext<NotificacionHub> _notificacionHubContext;
 
-        public DispositivosController(AguaDBContext db, IHubContext<MapHub> hubContext, IHubContext<NotificacionHub> notificacionHubContext)
+        public DispositivosController(AguaDBContext db, IHubContext<NotificacionHub> notificacionHubContext)
         {
             _db = db;
-            _hubContext = hubContext;
             _notificacionHubContext = notificacionHubContext;
         }
 
@@ -83,8 +74,16 @@ namespace Examen_UII.Controllers
             ViewData["Zonas"] = listaZonas;
             ViewData["Estados"] = listaEstados;
 
+            ViewData["PrioridadOptions"] = new List<SelectListItem>
+            {
+                new SelectListItem("Baja", "1"),
+                new SelectListItem("Media", "2"),
+                new SelectListItem("Alta", "3")
+            };
+
             return View();
         }
+
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
@@ -117,12 +116,22 @@ namespace Examen_UII.Controllers
                 {
                     return RedirectToAction("Error", "Usuarios");
                 }
-                await _notificacionHubContext.Clients.All.SendAsync("DeviceCreate", dispositivo.ID);
+                
+
+                List<Usuarios> admins = _db.Usuarios.Include(x => x.Roles).Where(x => x.RolesId == 1).ToList();
+                if (admins.Any())
+                {
+                    await _notificacionHubContext.Clients.All.SendAsync("DeviceCreate", dispositivo.ID);
+                }
+                await _notificacionHubContext.Clients.All.SendAsync("DeviceStateChanged", dispositivo.ID, dispositivo.EstadosId);
+                await _notificacionHubContext.Clients.All.SendAsync("AgregarATabla");
                 return RedirectToAction("Consultar");
 
             }
-
-            return View(dispositivo);
+            else
+            {
+                return RedirectToAction("Error", "Usuarios");
+            }
         }
 
         [Authorize(Roles = "Admin")]
@@ -160,8 +169,12 @@ namespace Examen_UII.Controllers
                     _db.RegistrosConsumo.Add(nuevoRegistro);
 
                     await _db.SaveChangesAsync();
-
-                    await _notificacionHubContext.Clients.All.SendAsync("DeviceOpened", id);
+                    await _notificacionHubContext.Clients.All.SendAsync("DeviceStateChanged", dispositivo.ID, dispositivo.EstadosId);
+                    List<Usuarios> admins = _db.Usuarios.Include(x => x.Roles).Where(x => x.RolesId == 1).ToList();
+                    if (admins.Any())
+                    {
+                        await _notificacionHubContext.Clients.All.SendAsync("DeviceOpened", id);
+                    }
                     return RedirectToAction("Mapa");
 
                 }
@@ -176,10 +189,9 @@ namespace Examen_UII.Controllers
             }
         }
 
-
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<IActionResult> Eliminar(int id)
+        public async Task<IActionResult> Eliminar([FromBody] int id)
         {
             var dispositivo = await _db.Dispositivos.FindAsync(id);
 
@@ -187,12 +199,18 @@ namespace Examen_UII.Controllers
             {
                 _db.Dispositivos.Remove(dispositivo);
                 await _db.SaveChangesAsync();
-                await _notificacionHubContext.Clients.All.SendAsync("DeviceDelete", id);
-                return RedirectToAction("Consultar");
+
+                List<Usuarios> admins = _db.Usuarios.Include(x => x.Roles).Where(x => x.RolesId == 1).ToList();
+                if (admins.Any())
+                {
+                    await _notificacionHubContext.Clients.All.SendAsync("DeviceDelete", id);
+                }
+
+                return Ok(); 
             }
             else
             {
-                return RedirectToAction("Error", "Usuarios");
+                return BadRequest("No se pudo encontrar el dispositivo"); 
             }
         }
 
@@ -201,6 +219,7 @@ namespace Examen_UII.Controllers
         {
             return View();
         }
+
         public IActionResult ObtenerDatosDispositivos()
         {
             try
@@ -229,6 +248,7 @@ namespace Examen_UII.Controllers
         {
             return View();
         }
+
         public IActionResult ObtenerDatos()
         {
             try
@@ -265,6 +285,11 @@ namespace Examen_UII.Controllers
         public IActionResult ErrorD()
         {
             return View();
+        }
+
+        public async Task<IActionResult> GetDispositivos()
+        {
+            return Json(await _db.Dispositivos.ToListAsync());
         }
 
     }

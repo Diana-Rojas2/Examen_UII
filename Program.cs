@@ -1,3 +1,4 @@
+using _2._5_WebSockets.Hubs;
 using Examen_UII.Hubs;
 using Examen_UII.Models;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -32,8 +33,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-//app.MapHub<MensajeHub>("/WebSocketServer");
-app.MapHub<MapHub>("/mapHub");
+app.MapHub<MensajeHub>("/WebSocketServer");
 app.MapHub<NotificacionHub>("/notificacionHub");
 app.UseHttpsRedirection();
 app.UseStaticFiles();

@@ -9,89 +9,89 @@ build_property.EnforceExtendedAnalyzerRules =
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = Examen_UII
 build_property.RootNamespace = Examen_UII
-build_property.ProjectDir = C:\IQ4B\Examen_UII\
+build_property.ProjectDir = c:\IQ4B\Examen_UII\
 build_property.RazorLangVersion = 7.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = C:\IQ4B\Examen_UII
+build_property.MSBuildProjectDirectory = c:\IQ4B\Examen_UII
 build_property._RazorSourceGeneratorDebug = 
 
-[C:/IQ4B/Examen_UII/Views/Dispositivos/Consultar.cshtml]
+[c:/IQ4B/Examen_UII/Views/Dispositivos/Consultar.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGlzcG9zaXRpdm9zXENvbnN1bHRhci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/IQ4B/Examen_UII/Views/Dispositivos/ErrorD.cshtml]
+[c:/IQ4B/Examen_UII/Views/Dispositivos/ErrorD.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGlzcG9zaXRpdm9zXEVycm9yRC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/IQ4B/Examen_UII/Views/Dispositivos/GraficaDatos.cshtml]
+[c:/IQ4B/Examen_UII/Views/Dispositivos/GraficaDatos.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGlzcG9zaXRpdm9zXEdyYWZpY2FEYXRvcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/IQ4B/Examen_UII/Views/Dispositivos/GraficaEstados.cshtml]
+[c:/IQ4B/Examen_UII/Views/Dispositivos/GraficaEstados.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGlzcG9zaXRpdm9zXEdyYWZpY2FFc3RhZG9zLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/IQ4B/Examen_UII/Views/Dispositivos/Mapa.cshtml]
+[c:/IQ4B/Examen_UII/Views/Dispositivos/Mapa.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGlzcG9zaXRpdm9zXE1hcGEuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/IQ4B/Examen_UII/Views/Dispositivos/Registrar.cshtml]
+[c:/IQ4B/Examen_UII/Views/Dispositivos/Registrar.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGlzcG9zaXRpdm9zXFJlZ2lzdHJhci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/IQ4B/Examen_UII/Views/Home/Index.cshtml]
+[c:/IQ4B/Examen_UII/Views/Home/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/IQ4B/Examen_UII/Views/Home/Privacy.cshtml]
+[c:/IQ4B/Examen_UII/Views/Home/Privacy.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/IQ4B/Examen_UII/Views/RegistrosConsumo/Consultar.cshtml]
+[c:/IQ4B/Examen_UII/Views/RegistrosConsumo/Consultar.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVnaXN0cm9zQ29uc3Vtb1xDb25zdWx0YXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/IQ4B/Examen_UII/Views/RegistrosConsumo/GraficaConsumo.cshtml]
+[c:/IQ4B/Examen_UII/Views/RegistrosConsumo/GraficaConsumo.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVnaXN0cm9zQ29uc3Vtb1xHcmFmaWNhQ29uc3Vtby5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/IQ4B/Examen_UII/Views/RegistrosConsumo/Registrar.cshtml]
+[c:/IQ4B/Examen_UII/Views/RegistrosConsumo/Registrar.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVnaXN0cm9zQ29uc3Vtb1xSZWdpc3RyYXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/IQ4B/Examen_UII/Views/Shared/Error.cshtml]
+[c:/IQ4B/Examen_UII/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/IQ4B/Examen_UII/Views/Shared/_ValidationScriptsPartial.cshtml]
+[c:/IQ4B/Examen_UII/Views/Shared/_ValidationScriptsPartial.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/IQ4B/Examen_UII/Views/Usuarios/Error.cshtml]
+[c:/IQ4B/Examen_UII/Views/Usuarios/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXN1YXJpb3NcRXJyb3IuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/IQ4B/Examen_UII/Views/Usuarios/Index.cshtml]
+[c:/IQ4B/Examen_UII/Views/Usuarios/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXN1YXJpb3NcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/IQ4B/Examen_UII/Views/Usuarios/Login.cshtml]
+[c:/IQ4B/Examen_UII/Views/Usuarios/Login.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXN1YXJpb3NcTG9naW4uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/IQ4B/Examen_UII/Views/Usuarios/NoPermitido.cshtml]
+[c:/IQ4B/Examen_UII/Views/Usuarios/NoPermitido.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXN1YXJpb3NcTm9QZXJtaXRpZG8uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/IQ4B/Examen_UII/Views/_ViewImports.cshtml]
+[c:/IQ4B/Examen_UII/Views/_ViewImports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/IQ4B/Examen_UII/Views/_ViewStart.cshtml]
+[c:/IQ4B/Examen_UII/Views/_ViewStart.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/IQ4B/Examen_UII/Views/Shared/_Layout.cshtml]
+[c:/IQ4B/Examen_UII/Views/Shared/_Layout.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = b-6y5lvofmwk

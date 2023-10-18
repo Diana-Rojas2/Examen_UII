@@ -1,24 +1,82 @@
 @model Examen_UII.Models.Usuarios
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Control de Consumo de Agua Potable";
 }
 
-<div>
+<div class="container">
+    <h1 class="text-center" style="color: #009DFF;">Control de Consumo de Agua Potable</h1>
+
     @if (User.Identity.IsAuthenticated)
     {
-        <h4 class="text-end" style="color: rgb(0, 157, 255);">Iniciaste sesión como: @ViewData["UserName"]</h4>
+        <div class="text-end">
+            <p>Sesión iniciada como: <strong>@ViewData["UserName"]</strong></p>
+        </div>
     }
 </div>
 
 
 
+<div class="container mt-4">
+    @if (User.IsInRole("Admin"))
+    {
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Estadísticas de Consumo</h3>
+                        <p class="card-text">Visualiza las estadísticas de consumo total de agua potable.</p>
+                        <a asp-controller="RegistrosConsumo" asp-action="GraficaConsumo" class="btn btn-primary">Ver
+                            Estadísticas</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Estadísticas de Estados</h3>
+                        <p class="card-text">Visualiza todos los estados de Dispositivos.</p>
+                        <a asp-controller="Dispositivos" asp-action="GraficaEstados" class="btn btn-primary">Ver
+                            Estadísticas</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    } else {
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Visualiza sus Dispositivos y cambiar el estado</h3>
+                        <p class="card-text">Visualiza los Dispositivos que se le asignaron.</p>
+                        <a asp-controller="Dispositivos" asp-action="Mapa" class="btn btn-primary">Ver
+                            Mapa</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 class="card-title">Registros de consumo</h3>
+                        <p class="card-text">Visualiza todos los registros de tus Dispositivos.</p>
+                        <a asp-controller="RegistrosConsumo" asp-action="Consultar" class="btn btn-primary">Ver
+                            Registro</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
 <script src="~/js/SignalR.js"></script>
 <script>
     const conexion = new signalR.HubConnectionBuilder().withUrl("/notificacionHub").build();
 
-    conexion.start().then(function (e) {
-        console.log("Conexión exitosa");
-    }).catch((e) => {
-        console.error("Error al conectarse al servidor de websockets");
-    })
+    conexion.start()
+        .then(function () {
+            console.log("Conexión exitosa al servidor de websockets.");
+        })
+        .catch(function (error) {
+            console.error("Error al conectarse al servidor de websockets: " + error);
+        });
 </script>

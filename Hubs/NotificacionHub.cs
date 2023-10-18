@@ -8,7 +8,6 @@ namespace Examen_UII.Hubs
     public class NotificacionHub : Hub
     {
         private readonly AguaDBContext _db;
-        private readonly UserManager<AguaDBContext> _userManager;
 
 
         public NotificacionHub(AguaDBContext db)

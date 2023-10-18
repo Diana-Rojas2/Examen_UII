@@ -52,8 +52,13 @@ namespace Examen_UII.Controllers
 
                         if (ultimoAbierto)
                         {
-                            await _notificacionHubContext.Clients.All.SendAsync("NotificacionCerrarUltimo", "No puedes cerrar el último dispositivo abierto.");
-                            return RedirectToAction("errorD", "Dispositivos");
+                            List<Usuarios> adminsList = _db.Usuarios.Include(x => x.Roles).Where(x => x.RolesId == 1).ToList();
+                            if (adminsList.Any())
+                            {
+                                await _notificacionHubContext.Clients.All.SendAsync("NotificacionCerrarUltimo", "No puedes cerrar el último dispositivo abierto.");
+                            }
+
+                            return RedirectToAction("Mapa", "Dispositivos");
                         }
 
                         var registroExistente = await _db.RegistrosConsumo
@@ -74,30 +79,44 @@ namespace Examen_UII.Controllers
                         dispositivo.EstadosId = 2;
 
                         await _db.SaveChangesAsync();
-                        await _notificacionHubContext.Clients.All.SendAsync("DeviceClosed", registros.DispositivosId);
+                        await _notificacionHubContext.Clients.All.SendAsync("DeviceStateChanged", dispositivo.ID, dispositivo.EstadosId);
+                        List<Usuarios> admins = _db.Usuarios.Include(x => x.Roles).Where(x => x.RolesId == 1).ToList();
+                        if (admins.Any())
+                        {
+                            await _notificacionHubContext.Clients.All.SendAsync("DeviceClosed", registros.DispositivosId);
+                        }
                         return RedirectToAction("Mapa", "Dispositivos");
                     }
                     else
                     {
                         return RedirectToAction("NoPermitido", "Usuarios");
                     }
-
                 }
             }
             return View(registros);
         }
 
 
-
-        [Authorize(Roles = "Admin")]
         public IActionResult Consultar()
         {
-
-            var registros = _db.RegistrosConsumo
-            .Include(r => r.Dispositivos)
-            .ToList();
-            return View(registros);
+            int userId = Convert.ToInt32(User.FindFirstValue("userId"));
+            if (User.IsInRole("Admin"))
+            {
+                var registros = _db.RegistrosConsumo
+                    .Include(r => r.Dispositivos)
+                    .ToList();
+                return View(registros);
+            }
+            else
+            {
+                var registros = _db.RegistrosConsumo
+                    .Include(r => r.Dispositivos)
+                    .Where(r => r.Dispositivos.UsuariosId == userId)
+                    .ToList();
+                return View(registros);
+            }
         }
+
 
         [Authorize(Roles = "Admin")]
         public IActionResult GraficaConsumo()
